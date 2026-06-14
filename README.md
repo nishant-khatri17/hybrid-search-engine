@@ -1,111 +1,164 @@
-# 🔍 Hybrid Search System with Semantic + Keyword Retrieval
+# Hybrid Search Engine
+
+A retrieval system that combines lexical search (BM25) and semantic search (Sentence Transformers) to improve search relevance and better capture user intent.
 
 ## Overview
-This project implements a **hybrid document retrieval system** that combines **semantic vector search** with **BM25-based keyword matching** to achieve high recall and high precision simultaneously.  
-Unlike a standard RAG pipeline that emphasizes generation, this project focuses on **optimizing the retrieval layer**, which is often the true bottleneck in real-world ML systems.
 
-The system is designed with **production-scale considerations** such as ANN indexing, retriever–reranker architecture, and retrieval quality evaluation.
+Traditional search engines rely on keyword matching, which performs well for exact matches but struggles with semantic understanding.
 
----
+Semantic search using transformer embeddings can understand meaning, but often misses exact identifiers, keywords, abbreviations, and domain-specific terminology.
+
+This project implements a **Hybrid Search Engine** that combines both approaches to retrieve documents that are both semantically relevant and lexically accurate.
 
 ## Motivation
-Most RAG implementations treat retrieval as a black box and rely solely on dense embeddings.  
-However, in large-scale systems (e.g., e-commerce search, knowledge discovery, enterprise QA), **exact keyword matching and semantic understanding must coexist**.
 
-This project explores:
-- Why dense-only retrieval fails in keyword-sensitive queries
-- How hybrid search improves robustness
-- How retrieval quality can be systematically evaluated and tuned
+Each retrieval method has limitations:
 
----
+### BM25 Search
 
-## System Architecture
+* Strong at exact keyword matching
+* Works well for rare terms and identifiers
+* Struggles with synonyms and paraphrases
 
+### Semantic Search
 
----
+* Understands contextual meaning
+* Handles paraphrases and natural language queries
+* Can miss exact keywords or domain-specific terms
 
-## Key Components
+Hybrid retrieval combines both signals to improve search quality.
 
-### 1. Dense Semantic Retrieval
-- Model: `all-MiniLM-L6-v2`
-- Embedding Dimension: 384
-- Captures semantic similarity beyond exact word overlap
-- Robust to paraphrasing and natural language queries
+## Architecture
 
----
+Query
+↓
+BM25 Retrieval
+↓
+Top-K Documents
 
-### 2. Sparse Keyword Retrieval (BM25)
-- Captures exact keyword importance
-- Penalizes common terms via IDF
-- Normalizes for document length
-- Prevents dense retrieval failure modes (e.g., missing rare entities)
+Query
+↓
+Sentence Transformer Embeddings
+↓
+Vector Similarity Search
 
----
+↓
+Score Fusion
+↓
+Final Ranked Results
 
-### 3. Hybrid Scoring
-Final score is computed as:
+## Features
 
+* BM25 keyword retrieval
+* Transformer-based semantic retrieval
+* Dense vector embeddings
+* Hybrid score fusion
+* Ranking and reranking
+* Search relevance evaluation
+* Retrieval experimentation notebook
 
-- α and β are tuned using retrieval evaluation metrics
-- Enables domain-specific tradeoffs between semantic recall and keyword precision
+## Methodology
 
----
+### Step 1: Lexical Retrieval
 
-### 4. Approximate Nearest Neighbor Search
-- Uses HNSW-style graph-based ANN indexing
-- Achieves sub-linear search complexity (~O(log N))
-- Scales to millions of documents with low latency
+Documents are indexed using BM25.
 
----
+The BM25 score measures relevance using:
 
-### 5. Retriever–Reranker Design
-- Retriever optimized for **high recall**
-- Reranker optimized for **high precision**
-- Mirrors production-grade search architectures used in large ML systems
+* Term Frequency (TF)
+* Inverse Document Frequency (IDF)
+* Document length normalization
 
----
+### Step 2: Semantic Retrieval
 
-## Evaluation Strategy
+Queries and documents are embedded using transformer models.
 
-Retrieval quality is evaluated using standard IR metrics:
+Similarity is computed using cosine similarity in embedding space.
 
-- **Recall@K** – measures whether relevant documents appear in top-K
-- **MRR (Mean Reciprocal Rank)** – measures how early the correct result is ranked
+### Step 3: Hybrid Fusion
 
-These metrics guide:
-- Hybrid weight tuning (α, β)
-- ANN parameters
-- Candidate set size for reranking
+Final ranking combines:
 
----
+Hybrid Score = α × BM25 + (1 − α) × Semantic Similarity
 
-## Why Not a Standard RAG Pipeline?
-Traditional RAG demos emphasize text generation, but:
-- Generation quality is bounded by retrieval quality
-- Poor retrieval cannot be fixed downstream
-- Production systems prioritize **retrieval robustness and latency guarantees**
-
-This project intentionally focuses on **retrieval-first ML system design**, aligning more closely with real-world Applied ML roles.
-
----
+where α controls the contribution of lexical and semantic retrieval.
 
 ## Technologies Used
-- LangChain
-- Pinecone (Vector Database)
-- HuggingFace Sentence Transformers
-- BM25 Sparse Encoding
-- ANN / HNSW Indexing
-- Python
 
----
+* Python
+* Sentence Transformers
+* BM25
+* NumPy
+* Pandas
+* Scikit-Learn
+* Jupyter Notebook
+
+## Repository Structure
+
+```text
+Hybrid-Search/
+│
+├── experiments.ipynb
+├── bm25_values.json
+├── requirements.txt
+└── README.md
+```
+
+## Example Queries
+
+### Query
+
+```text
+machine learning for document ranking
+```
+
+### BM25 Result
+
+Returns documents containing exact terms.
+
+### Semantic Result
+
+Returns conceptually related documents discussing:
+
+* ranking systems
+* retrieval models
+* information retrieval
+
+### Hybrid Result
+
+Combines both signals for improved relevance.
+
+## Applications
+
+* Enterprise Search
+* Research Paper Discovery
+* Knowledge Management Systems
+* Document Retrieval
+* Retrieval-Augmented Generation (RAG)
+* Recommendation Systems
 
 ## Future Improvements
-- Learned rerankers using cross-encoders
-- Query-dependent dynamic α/β weighting
-- Online evaluation with user feedback signals
-- Domain-adaptive embedding fine-tuning
 
----
+* Reciprocal Rank Fusion (RRF)
+* Cross-Encoder Reranking
+* FAISS Vector Indexing
+* Dense Passage Retrieval (DPR)
+* Hybrid RAG Pipelines
+* Query Expansion using LLMs
 
-## Key Takeaway
-This project demonstrates that **retrieval is not just a preprocessing step**, but a core ML problem involving ranking theory, approximate search, and system-level tradeoffs—critical for building scalable, high-quality ML applications.
+## Key Concepts
+
+* Information Retrieval
+* BM25
+* Semantic Search
+* Embeddings
+* Vector Similarity
+* Ranking Systems
+* Hybrid Retrieval
+* Retrieval-Augmented Generation
+
+## Author
+
+Nishant Khatri
+
+Built as an exploration of modern information retrieval systems combining lexical and semantic search techniques.
